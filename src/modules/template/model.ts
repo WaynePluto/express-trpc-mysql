@@ -10,6 +10,6 @@ export interface IModel {
   deleted_time?: Date
 }
 
-export const createDTO = z.object({
+export const createZod = z.object({
   name: z.string(),
 })

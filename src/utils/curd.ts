@@ -42,21 +42,21 @@ type ZodPartial<T> = z.ZodObject<
 
 type CommonRouterParams<T extends IDocument> = {
   p: P
-  createDTO: ZodObj<T>
-  updateDTO: ZodPartial<T>
-  findDTO: ZodPartial<T>
+  createZod: ZodObj<T>
+  updateZod: ZodPartial<T>
+  findZod: ZodPartial<T>
   tableName: string
 }
 
 export const CommonRouter = <T extends IDocument>({
   p,
-  createDTO,
-  findDTO,
-  updateDTO,
+  createZod,
+  findZod,
+  updateZod,
   tableName,
 }: CommonRouterParams<T>) =>
   router({
-    create: p.input(createDTO).mutation(async ({ input, ctx }) => {
+    create: p.input(createZod).mutation(async ({ input, ctx }) => {
       try {
         const { knexBuilder } = ctx
         const qb = () => knexBuilder<T>(tableName)
@@ -80,7 +80,7 @@ export const CommonRouter = <T extends IDocument>({
       const res = await qb.select('*').where('uuid', input.uuid).first()
       return res
     }),
-    findList: p.input(findDTO.merge(hasPage)).mutation(async ({ input, ctx }) => {
+    findList: p.input(findZod.merge(hasPage)).mutation(async ({ input, ctx }) => {
       const { knexBuilder } = ctx
       const { page, pageSize } = input!
       const offset = (page! - 1) * pageSize!
@@ -94,7 +94,7 @@ export const CommonRouter = <T extends IDocument>({
         total: countRes[0].count ?? 0,
       }
     }),
-    updateByUUId: p.input(updateDTO.merge(hasUUID)).mutation(async ({ input, ctx }) => {
+    updateByUUId: p.input(updateZod.merge(hasUUID)).mutation(async ({ input, ctx }) => {
       const { knexBuilder } = ctx
       const qb = knexBuilder<T>(tableName)
       const data = omit(input, ['uuid']) as any
