@@ -81,7 +81,7 @@ export const CommonOperation = {
       const { page, pageSize } = input!
       const offset = (page! - 1) * pageSize!
       const findParams = omit(input, ['page', 'pageSize'])
-      const findBuilder = () => getFindBuilder(knex<T>(tableName), { ...findParams, 'is_deleted': 0 }, tableName)
+      const findBuilder = () => getFindBuilder(knex<T>(tableName), { ...findParams, 'is_delete': 0 }, tableName)
 
       const countRes = await findBuilder().count({ count: '*' })
       const listRes = await findBuilder().select('*').limit(pageSize!).offset(offset)
@@ -102,7 +102,7 @@ export const CommonOperation = {
   tagDelete: <T extends IDocument>(p: P, tableName: string) =>
     p.input(z.array(z.string())).mutation(async ({ input, ctx }) => {
       const { knex } = ctx
-      const res = await knex<T>(tableName).whereIn('uuid', input).update('is_deleted', 1)
+      const res = await knex<T>(tableName).whereIn('uuid', input).update('is_delete', 1)
       return res
     }),
 
