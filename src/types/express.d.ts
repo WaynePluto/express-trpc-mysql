@@ -7,7 +7,7 @@ declare global {
   namespace Express {
     interface Request {
       context: {
-        knexBuilder: <T extends IDocument>(table: string) => Knex.QueryBuilder<T, T[]>
+        knex: <T extends IDocument>(table: string) => Knex.QueryBuilder<T, T[]>
       }
     }
   }

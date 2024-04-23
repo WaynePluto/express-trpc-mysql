@@ -1,7 +1,7 @@
 /**
  * @type {import('jest').Config}
  */
-module.exports = {
+export default {
   clearMocks: true,
 
   collectCoverage: false,
@@ -20,5 +20,5 @@ module.exports = {
     '@/(.*)': '<rootDir>/src/$1',
   },
 
-  testMatch: ['<rootDir>/src/modules/template/*.spec.ts'],
+  testMatch: ['<rootDir>/src/modules/**/*/*.spec.ts'],
 }

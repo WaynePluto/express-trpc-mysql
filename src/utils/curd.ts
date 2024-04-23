@@ -48,22 +48,15 @@ type CommonRouterParams<T extends IDocument> = {
   tableName: string
 }
 
-export const CommonRouter = <T extends IDocument>({
-  p,
-  createZod,
-  findZod,
-  updateZod,
-  tableName,
-}: CommonRouterParams<T>) =>
-  router({
-    create: p.input(createZod).mutation(async ({ input, ctx }) => {
+export const CommonOperation = {
+  create: <T extends IDocument>(p: P, tableName: string, createZod: ZodObj<T>) =>
+    p.input(createZod).mutation(async ({ input, ctx }) => {
       try {
-        const { knexBuilder } = ctx
-        const qb = () => knexBuilder<T>(tableName)
-        const [id] = await qb().insert(input as any)
+        const { knex } = ctx
+        const [id] = await knex<T>(tableName).insert(input as any)
         const uuid = getUUID(id)
         const data = { uuid } as any
-        const successCount = await qb().where('id', id).update(data)
+        const successCount = await knex<T>(tableName).where('id', id).update(data)
         if (successCount > 0) {
           return uuid
         } else {
@@ -74,18 +67,21 @@ export const CommonRouter = <T extends IDocument>({
         return ''
       }
     }),
-    findByUUId: p.input(hasUUID).mutation(async ({ input, ctx }) => {
-      const { knexBuilder } = ctx
-      const qb = knexBuilder<T>(tableName)
-      const res = await qb.select('*').where('uuid', input.uuid).first()
+
+  findByUUId: <T extends IDocument>(p: P, tableName: string) =>
+    p.input(hasUUID).mutation(async ({ input, ctx }) => {
+      const { knex } = ctx
+      const res = await knex<T>(tableName).select('*').where('uuid', input.uuid).first()
       return res
     }),
-    findList: p.input(findZod.merge(hasPage)).mutation(async ({ input, ctx }) => {
-      const { knexBuilder } = ctx
+
+  findList: <T extends IDocument>(p: P, tableName: string, findZod: ZodPartial<T>) =>
+    p.input(findZod.merge(hasPage)).mutation(async ({ input, ctx }) => {
+      const { knex } = ctx
       const { page, pageSize } = input!
       const offset = (page! - 1) * pageSize!
       const findParams = omit(input, ['page', 'pageSize'])
-      const findBuilder = () => getFindBuilder(knexBuilder<T>(tableName), { ...findParams, 'is_deleted': 0 }, tableName)
+      const findBuilder = () => getFindBuilder(knex<T>(tableName), { ...findParams, 'is_deleted': 0 }, tableName)
 
       const countRes = await findBuilder().count({ count: '*' })
       const listRes = await findBuilder().select('*').limit(pageSize!).offset(offset)
@@ -94,25 +90,42 @@ export const CommonRouter = <T extends IDocument>({
         total: countRes[0].count ?? 0,
       }
     }),
-    updateByUUId: p.input(updateZod.merge(hasUUID)).mutation(async ({ input, ctx }) => {
-      const { knexBuilder } = ctx
-      const qb = knexBuilder<T>(tableName)
+
+  updateByUUId: <T extends IDocument>(p: P, tableName: string, updateZod: ZodPartial<T>) =>
+    p.input(updateZod.merge(hasUUID)).mutation(async ({ input, ctx }) => {
+      const { knex } = ctx
       const data = omit(input, ['uuid']) as any
-      const res = await qb.where('uuid', input!.uuid).update(data)
+      const res = await knex<T>(tableName).where('uuid', input!.uuid).update(data)
       return res
     }),
 
-    tagDelete: p.input(z.array(z.string())).mutation(async ({ input, ctx }) => {
-      const { knexBuilder } = ctx
-      const qb = knexBuilder<T>(tableName)
-      const res = await qb.whereIn('uuid', input).update('is_deleted', 1)
+  tagDelete: <T extends IDocument>(p: P, tableName: string) =>
+    p.input(z.array(z.string())).mutation(async ({ input, ctx }) => {
+      const { knex } = ctx
+      const res = await knex<T>(tableName).whereIn('uuid', input).update('is_deleted', 1)
       return res
     }),
 
-    delete: p.input(z.array(z.string())).mutation(async ({ input, ctx }) => {
-      const { knexBuilder } = ctx
-      const qb = knexBuilder<T>(tableName)
-      const res = await qb.whereIn('uuid', input).delete()
+  delete: <T extends IDocument>(p: P, tableName: string) =>
+    p.input(z.array(z.string())).mutation(async ({ input, ctx }) => {
+      const { knex } = ctx
+      const res = await knex<T>(tableName).whereIn('uuid', input).delete()
       return res
     }),
+}
+
+export const CommonRouter = <T extends IDocument>({
+  p,
+  createZod,
+  findZod,
+  updateZod,
+  tableName,
+}: CommonRouterParams<T>) =>
+  router({
+    create: CommonOperation.create(p, tableName, createZod),
+    findByUUId: CommonOperation.findByUUId(p, tableName),
+    findList: CommonOperation.findList(p, tableName, findZod),
+    updateByUUId: CommonOperation.updateByUUId(p, tableName, updateZod),
+    tagDelete: CommonOperation.tagDelete(p, tableName),
+    delete: CommonOperation.delete(p, tableName),
   })

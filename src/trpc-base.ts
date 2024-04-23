@@ -8,7 +8,7 @@ export const createContext = ({ req, res }: trpcExpress.CreateExpressContextOpti
   const auth = req.headers.authorization
   const tokenPayload: any = auth ? jwt.decode(auth.replace('Bearer ', '')) : null
   return {
-    knexBuilder: req.context.knexBuilder,
+    knex: req.context.knex,
     tokenPayload,
   }
 }
@@ -27,11 +27,11 @@ export type P = typeof p
 /** 服务端路由调用 */
 export const getServerCaller = <T extends Router<any>, K extends IDocument>(
   router: T,
-  knexBuilder: <T extends IDocument>(table: string) => Knex.QueryBuilder<T, T[]>,
+  knex: <T extends IDocument>(table: string) => Knex.QueryBuilder<T, T[]>,
   tokenPayload: any = null,
 ) =>
   trpc.createCallerFactory(router)({
-    knexBuilder,
+    knex,
     tokenPayload,
     headers: {} as IncomingHttpHeaders,
   })

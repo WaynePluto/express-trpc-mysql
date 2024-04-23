@@ -1,4 +1,4 @@
-import { configKnex, getKnexBuilder } from '@/middlewares/knex'
+import { configKnex, getKnex } from '@/middlewares/knex'
 import { getServerCaller } from '@/trpc-base'
 import { tableName } from './model'
 import { RouterName } from './router'
@@ -7,7 +7,7 @@ describe(`test table:${tableName}`, () => {
   const { PORT, JWT_SECRET = '', HOST, DATABASE, USER, PASSWORD } = process.env
 
   const knexInst = configKnex({ host: HOST, database: DATABASE, user: USER, password: PASSWORD })
-  const builder = getKnexBuilder(knexInst)
+  const builder = getKnex(knexInst)
   const caller = getServerCaller(RouterName, builder)
 
   const ids: string[] = []

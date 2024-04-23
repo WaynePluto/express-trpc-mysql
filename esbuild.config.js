@@ -1,4 +1,6 @@
-const esbuild = require('esbuild')
+import console from 'console'
+import esbuild from 'esbuild'
+import process from 'process'
 
 const options = {
   entryPoints: ['src/app.ts'],

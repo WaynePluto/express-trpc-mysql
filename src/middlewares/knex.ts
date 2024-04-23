@@ -17,7 +17,7 @@ export const configKnex = (params: { host; database; user; password }) => {
   return knex(config)
 }
 
-export const getKnexBuilder = (knexInst: knex.Knex<any, unknown[]>) => {
+export const getKnex = (knexInst: knex.Knex<any, unknown[]>) => {
   // const pool = knexInst.client.pool
 
   // pool.on('createSuccess', () => {
@@ -48,11 +48,11 @@ export const getKnexBuilder = (knexInst: knex.Knex<any, unknown[]>) => {
 
 export const initKnex = (params: { host; database; user; password }): RequestHandler => {
   const inst = configKnex(params)
-  const builder = getKnexBuilder(inst)
+  const builder = getKnex(inst)
 
   return (req, res, next) => {
     req.context = {
-      knexBuilder: builder,
+      knex: builder,
     }
     next()
   }
