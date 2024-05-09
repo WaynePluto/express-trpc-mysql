@@ -2,4 +2,5 @@ trpc-router-type
 coverage
 dist
 node_modules
+pnpm-lock.yaml
 .env.dev

@@ -1,4 +1,5 @@
 import type { Knex } from 'knex'
+import type { Db } from 'mongodb'
 
 declare global {
   interface IDocument {
@@ -8,6 +9,7 @@ declare global {
     interface Request {
       context: {
         knex: <T extends IDocument>(table: string) => Knex.QueryBuilder<T, T[]>
+        mongodb: Db
       }
     }
   }

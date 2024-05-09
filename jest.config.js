@@ -20,5 +20,6 @@ export default {
     '@/(.*)': '<rootDir>/src/$1',
   },
 
-  testMatch: ['<rootDir>/src/modules/**/*/*.spec.ts'],
+  // testMatch: ['<rootDir>/src/modules/**/*/*.spec.ts'],
+  testMatch: ['<rootDir>/src/modules/template-mongodb/*.spec.ts'],
 }

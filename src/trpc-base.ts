@@ -3,12 +3,14 @@ import * as trpcExpress from '@trpc/server/adapters/express'
 import { IncomingHttpHeaders } from 'http'
 import jwt from 'jsonwebtoken'
 import type { Knex } from 'knex'
+import { Db } from 'mongodb'
 
 export const createContext = ({ req, res }: trpcExpress.CreateExpressContextOptions) => {
   const auth = req.headers.authorization
   const tokenPayload: any = auth ? jwt.decode(auth.replace('Bearer ', '')) : null
   return {
     knex: req.context.knex,
+    mongodb: req.context.mongodb,
     tokenPayload,
   }
 }
@@ -25,13 +27,25 @@ export const mergeRouters = trpc.mergeRouters
 export type P = typeof p
 
 /** 服务端路由调用 */
-export const getServerCaller = <T extends Router<any>, K extends IDocument>(
+export const getServerCallerWithKnex = <T extends Router<any>, K extends IDocument>(
   router: T,
   knex: <T extends IDocument>(table: string) => Knex.QueryBuilder<T, T[]>,
   tokenPayload: any = null,
 ) =>
   trpc.createCallerFactory(router)({
     knex,
+    tokenPayload,
+    headers: {} as IncomingHttpHeaders,
+  })
+
+/** 服务端路由调用 */
+export const getServerCallerWithMongodb = <T extends Router<any>, K extends IDocument>(
+  router: T,
+  mongodb: Db,
+  tokenPayload: any = null,
+) =>
+  trpc.createCallerFactory(router)({
+    mongodb,
     tokenPayload,
     headers: {} as IncomingHttpHeaders,
   })

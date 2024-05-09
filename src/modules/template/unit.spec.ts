@@ -1,5 +1,5 @@
 import { configKnex, getKnex } from '@/middlewares/knex'
-import { getServerCaller } from '@/trpc-base'
+import { getServerCallerWithKnex } from '@/trpc-base'
 import { tableName } from './model'
 import { RouterName } from './router'
 
@@ -8,7 +8,7 @@ describe(`test table:${tableName}`, () => {
 
   const knexInst = configKnex({ host: HOST, database: DATABASE, user: USER, password: PASSWORD })
   const builder = getKnex(knexInst)
-  const caller = getServerCaller(RouterName, builder)
+  const caller = getServerCallerWithKnex(RouterName, builder)
 
   const ids: string[] = []
 
